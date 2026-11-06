@@ -4,7 +4,7 @@ import 'dart:convert';
 
 // Palet yang sama dengan LandingScreen
 const _navy = Color(0xFF131921);
-const _navy2 = Color(0xFF232F3E);
+//const _navy2 = Color(0xFF232F3E);
 const _orange = Color(0xFFFF9900);
 const _orangeSoft = Color(0xFFFFD814);
 const _pageBg = Color(0xFFEAEDED);

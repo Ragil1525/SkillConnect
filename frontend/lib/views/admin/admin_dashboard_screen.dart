@@ -1,141 +1,341 @@
 import 'package:flutter/material.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
   @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  // Palet Warna Tema Amazon
+  static const Color amazonNavy = Color(0xFF131921);       // Sidebar & Header
+  static const Color amazonNavyLight = Color(0xFF232F3E);  // Menu Aktif / Sub-header
+  static const Color amazonOrange = Color(0xFFFF9900);     // Tombol Aksen & Highlight
+  static const Color amazonBg = Color(0xFFEAEDED);         // Latar Belakang Utama
+  static const Color amazonTextDark = Color(0xFF0F1111);   // Teks Utama
+
+  int _selectedMenuIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
+    // Mengecek apakah layar menggunakan tampilan desktop/tablet lebar
+    final bool isDesktop = MediaQuery.of(context).size.width >= 850;
+
     return Scaffold(
+      backgroundColor: amazonBg,
+      // Top Navigation Bar
       appBar: AppBar(
-        title: const Text('Admin Dashboard - SkillConnect'),
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Banner Statistik Utama
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Colors.indigo, Colors.blueAccent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+        backgroundColor: Colors.white,
+        elevation: 1,
+        titleSpacing: 24,
+        title: const Text(
+          'SkillConnect',
+          style: TextStyle(
+            color: amazonNavy,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 24.0),
+            child: Center(
+              child: Text(
+                'Admin',
+                style: TextStyle(
+                  color: amazonNavy,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
-                borderRadius: BorderRadius.circular(16),
               ),
+            ),
+          ),
+        ],
+      ),
+      drawer: !isDesktop ? _buildSidebar() : null,
+      body: Row(
+        children: [
+          // Sidebar Navigasi (Tampil permanen jika layar Desktop)
+          if (isDesktop) _buildSidebar(),
+
+          // Area Konten Utama Dashboard
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(28.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Judul & Sub-judul
                   const Text(
-                    'Total Pendapatan Komisi (10%)',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Rp 4.850.000',
+                    'Dashboard Admin',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: amazonTextDark,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('Total Pengguna: 142', style: TextStyle(color: Colors.white70)),
-                      Text('Total Transaksi: 85', style: TextStyle(color: Colors.white70)),
-                    ],
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Pantau aktivitas utama dan performa SkillConnect',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 4 Kartu Statistik (Stat Cards Row)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      double cardWidth = constraints.maxWidth > 900
+                          ? (constraints.maxWidth - 48) / 4
+                          : (constraints.maxWidth - 16) / 2;
+
+                      return Wrap(
+                        spacing: 16,
+                        runSpacing: 16,
+                        children: [
+                          _buildStatCard('Total pengguna', '1.248', cardWidth),
+                          _buildStatCard('Pesanan aktif', '86', cardWidth),
+                          _buildStatCard('Transaksi', 'Rp24,8 jt', cardWidth, isOrangeText: true),
+                          _buildStatCard('Perlu ditinjau', '12', cardWidth),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Container Tabel Data
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header Tabel: Judul & Tombol Tambah
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Daftar data',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: amazonTextDark,
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: amazonNavy,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () {},
+                              icon: const Icon(Icons.add, size: 18, color: amazonOrange),
+                              label: const Text(
+                                'Tambah data',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Header Kolom Tabel
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF2F4F8),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            children: const [
+                              Expanded(flex: 3, child: Text('Nama / ID', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: amazonNavy))),
+                              Expanded(flex: 4, child: Text('Informasi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: amazonNavy))),
+                              Expanded(flex: 2, child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: amazonNavy))),
+                              SizedBox(width: 40, child: Text('Aksi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: amazonNavy))),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Baris Data Tabel
+                        _buildTableRow('Ringkasan pengguna', 'Pendaftaran dan status akun', 'Aktif'),
+                        const Divider(),
+                        _buildTableRow('Ringkasan pesanan', 'Pesanan aktif dan selesai', 'Aktif'),
+                        const Divider(),
+                        _buildTableRow('Transaksi terbaru', 'Pembayaran, komisi, dan payout', 'Aktif'),
+                        const Divider(),
+                        _buildTableRow('Pusat perhatian', 'Pengaduan yang perlu ditinjau', 'Aktif'),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Menu Manajemen Admin
-            const Text(
-              'Panel Kontrol Administrator',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  // Widget Sidebar Kiri
+  Widget _buildSidebar() {
+    return Container(
+      width: 240,
+      color: amazonNavy,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(left: 20, top: 24, bottom: 12),
+            child: Text(
+              'MENU UTAMA',
+              style: TextStyle(
+                color: Colors.white38,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
             ),
-            const SizedBox(height: 12),
+          ),
+          _buildSidebarMenuItem(0, 'Dashboard'),
+          _buildSidebarMenuItem(1, 'Pengguna', route: '/admin-users'),
+          _buildSidebarMenuItem(2, 'Kategori', route: '/admin-categories'),
+          _buildSidebarMenuItem(3, 'Transaksi', route: '/admin-commission'),
+          _buildSidebarMenuItem(4, 'Pengaturan'),
+        ],
+      ),
+    );
+  }
 
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.3,
-              children: [
-                _buildAdminMenuCard(
-                  context,
-                  title: 'Verifikasi Provider',
-                  icon: Icons.verified_user,
-                  color: Colors.orange,
-                  onTap: () => Navigator.pushNamed(context, '/admin-verify'),
-                ),
-                _buildAdminMenuCard(
-                  context,
-                  title: 'Kelola Pengguna',
-                  icon: Icons.people,
-                  color: Colors.blue,
-                  onTap: () => Navigator.pushNamed(context, '/admin-users'),
-                ),
-                _buildAdminMenuCard(
-                  context,
-                  title: 'Kelola Komisi',
-                  icon: Icons.monetization_on,
-                  color: Colors.green,
-                  onTap: () => Navigator.pushNamed(context, '/admin-commission'),
-                ),
-                _buildAdminMenuCard(
-                  context,
-                  title: 'Pusat Sengketa',
-                  icon: Icons.report_problem,
-                  color: Colors.red,
-                  onTap: () => Navigator.pushNamed(context, '/admin-dispute'),
-                ),
-              ],
+  // Item Navigasi Sidebar
+  Widget _buildSidebarMenuItem(int index, String title, {String? route}) {
+    bool isSelected = _selectedMenuIndex == index;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () {
+            setState(() {
+              _selectedMenuIndex = index;
+            });
+            if (route != null) {
+              Navigator.pushNamed(context, route);
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: isSelected ? amazonNavyLight : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+              border: isSelected ? const Border(left: BorderSide(color: amazonOrange, width: 4)) : null,
             ),
-          ],
+            child: Text(
+              title,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.white70,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 14,
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildAdminMenuCard(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 36, color: color),
-              const SizedBox(height: 10),
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                textAlign: TextAlign.center,
-              ),
-            ],
+  // Widget Kartu Ringkasan (Stat Card)
+  Widget _buildStatCard(String title, String value, double width, {bool isOrangeText = false}) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
           ),
-        ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: isOrangeText ? amazonOrange : amazonTextDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget Baris Tabel Data
+  Widget _buildTableRow(String name, String info, String status) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(
+              name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: amazonNavy),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Text(
+              info,
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE6F4EA),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    status,
+                    style: const TextStyle(
+                      color: Color(0xFF137333),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 40,
+            child: IconButton(
+              icon: const Icon(Icons.more_horiz, color: Colors.grey),
+              onPressed: () {},
+            ),
+          ),
+        ],
       ),
     );
   }
