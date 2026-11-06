@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 
+// Palet yang sama dengan LandingScreen, LoginScreen, dan NotificationScreen
+const _navy = Color(0xFF131921);
+const _navy2 = Color(0xFF232F3E);
+const _orange = Color(0xFFFF9900);
+const _orangeSoft = Color(0xFFFFD814);
+const _pageBg = Color(0xFFEAEDED);
+const _ink = Color(0xFF0F1111);
+const _muted = Color(0xFF565959);
+const _border = Color(0xFFD5D9D9);
+const _danger = Color(0xFFB12704);
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -17,6 +28,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'city': 'Padang, Sumatera Barat',
   };
 
+  InputDecoration _fieldDecoration(String label) {
+    OutlineInputBorder border(Color color, [double width = 1]) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide(color: color, width: width),
+        );
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: _muted),
+      floatingLabelStyle: const TextStyle(color: _ink, fontWeight: FontWeight.bold),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      border: border(const Color(0xFF888C8C)),
+      enabledBorder: border(const Color(0xFF888C8C)),
+      focusedBorder: border(_orange, 2),
+    );
+  }
+
   // Fungsi untuk menampilkan Bottom Sheet Edit Profil
   void _showEditProfileModal() {
     final nameController = TextEditingController(text: userProfile['name']);
@@ -26,77 +54,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
       builder: (context) {
-        return Padding(
+        return SingleChildScrollView(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
+            left: 20,
+            right: 20,
             top: 24,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Edit Profil',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Lengkap',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Nomor Telepon',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: cityController,
-                decoration: const InputDecoration(
-                  labelText: 'Kota / Lokasi',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Edit Profil',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: _ink),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(controller: nameController, decoration: _fieldDecoration('Nama Lengkap')),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: _fieldDecoration('Nomor Telepon'),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(controller: cityController, decoration: _fieldDecoration('Kota / Lokasi')),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _orangeSoft,
+                        foregroundColor: _ink,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          userProfile['name'] = nameController.text;
+                          userProfile['phone'] = phoneController.text;
+                          userProfile['city'] = cityController.text;
+                        });
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Profil berhasil diperbarui!')),
+                        );
+                      },
+                      child: const Text('Simpan Perubahan', style: TextStyle(fontWeight: FontWeight.w600)),
                     ),
                   ),
-                  onPressed: () {
-                    setState(() {
-                      userProfile['name'] = nameController.text;
-                      userProfile['phone'] = phoneController.text;
-                      userProfile['city'] = cityController.text;
-                    });
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Profil berhasil diperbarui!')),
-                    );
-                  },
-                  child: const Text('Simpan Perubahan', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                  const SizedBox(height: 24),
+                ],
               ),
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
         );
       },
@@ -106,92 +125,120 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _pageBg,
       appBar: AppBar(
-        title: const Text('Profil Pengguna'),
-        backgroundColor: Colors.deepPurple,
+        title: const Text('Profil Pengguna', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: _navy,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            // Avatar & Nama
-            const CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.deepPurple,
-              child: Icon(Icons.person, size: 50, color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              userProfile['name']!,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              userProfile['email']!,
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple.shade50,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                userProfile['role']!,
-                style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-            ),
-            const SizedBox(height: 32),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              children: [
+                // Kartu avatar & nama
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: _border),
+                  ),
+                  child: Column(
+                    children: [
+                      const CircleAvatar(
+                        radius: 48,
+                        backgroundColor: _navy2,
+                        child: Icon(Icons.person, size: 48, color: _orange),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        userProfile['name']!,
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _ink),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(userProfile['email']!, style: const TextStyle(color: _muted, fontSize: 14)),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F2F2),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: _border),
+                        ),
+                        child: Text(
+                          userProfile['role']!,
+                          style: const TextStyle(color: _ink, fontWeight: FontWeight.w600, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-            // Informasi Detail Akun
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    _buildInfoRow(Icons.phone, 'Nomor Telepon', userProfile['phone']!),
-                    const Divider(height: 24),
-                    _buildInfoRow(Icons.location_on, 'Lokasi', userProfile['city']!),
-                  ],
+                // Informasi detail akun
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: _border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Informasi akun',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _ink)),
+                      const SizedBox(height: 16),
+                      _buildInfoRow(Icons.phone_outlined, 'Nomor Telepon', userProfile['phone']!),
+                      const Divider(height: 28, color: _border),
+                      _buildInfoRow(Icons.location_on_outlined, 'Lokasi', userProfile['city']!),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-            // Tombol Aksi
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                // Tombol aksi
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _orangeSoft,
+                      foregroundColor: _ink,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                    ),
+                    onPressed: _showEditProfileModal, // Memanggil modal edit profil
+                    child: const Text('Edit Profil', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
                 ),
-                onPressed: _showEditProfileModal, // Memanggil modal edit profil
-                child: const Text('Edit Profil'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: _danger,
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: _border),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                    ),
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                    },
+                    child: const Text('Keluar (Logout)', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
                 ),
-                onPressed: () {
-                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-                },
-                child: const Text('Keluar (Logout)', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
+                const SizedBox(height: 16),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -200,15 +247,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, color: Colors.deepPurple),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F2F2),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(icon, color: _navy2, size: 22),
+        ),
         const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-            const SizedBox(height: 2),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(color: _muted, fontSize: 12)),
+              const SizedBox(height: 2),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15, color: _ink)),
+            ],
+          ),
         ),
       ],
     );
